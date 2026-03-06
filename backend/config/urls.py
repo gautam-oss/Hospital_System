@@ -21,9 +21,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     # ── API v1 ──────────────────────────────────────────────
-    # path("api/v1/auth/", include("apps.accounts.urls")),  # Phase 2
-    # path("api/v1/doctors/", include("apps.doctors.urls")),  # Phase 2
-    # path("api/v1/appointments/", include("apps.appointments.urls")),  # Phase 2
+    path("api/v1/auth/", include("apps.accounts.urls")),  # Phase 2
+    path("api/v1/doctors/", include("apps.doctors.urls")),  # Phase 2
+    path("api/v1/appointments/", include("apps.appointments.urls")),  # Phase 
 
     # ── API Documentation ────────────────────────────────────
     # /api/schema/          → raw OpenAPI JSON

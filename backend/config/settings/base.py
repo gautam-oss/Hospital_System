@@ -54,15 +54,15 @@ THIRD_PARTY_APPS = [
     "corsheaders",                  # CORS headers for React frontend
     "django_filters",               # filtering queryset in API
     "drf_spectacular",              # auto API docs
+    "rest_framework_simplejwt.token_blacklist",
 ]
 
 LOCAL_APPS = [
-    # These are our custom apps — we'll create them in Phase 2
     "apps.core",
-    "apps.accounts",        # users, auth, roles
-    # "apps.doctors",    # Phase 2         # doctor profiles, availability
-    # "apps.appointments", # Phase 2    # booking system
-    # "apps.notifications", # Phase 2   # email notifications
+    "apps.accounts",
+    "apps.doctors",
+    "apps.appointments",
+    "apps.notifications",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -187,7 +187,7 @@ REST_FRAMEWORK = {
     # Use drf-spectacular for OpenAPI schema generation
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     # Consistent error format across all endpoints
-    # "EXCEPTION_HANDLER": "config.exceptions.custom_exception_handler",  # Phase 2
+    "EXCEPTION_HANDLER": "config.exceptions.custom_exception_handler",  # Phase 2
 }
 
 
