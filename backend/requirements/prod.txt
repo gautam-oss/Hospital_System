@@ -1,0 +1,11 @@
+# ── PRODUCTION REQUIREMENTS ──────────────────────────────────
+
+-r base.txt
+
+# Gunicorn: production-grade WSGI server
+# Django's built-in runserver is NOT safe for production — it's single-threaded
+# Gunicorn spawns multiple worker processes to handle concurrent requests
+gunicorn==22.0.0
+
+# Security headers middleware
+django-csp==3.8             # Content Security Policy

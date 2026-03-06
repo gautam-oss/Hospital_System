@@ -1,0 +1,64 @@
+# ─── Python / Django ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Django specific
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+
+# ─── Node / React ─────────────────────────────────────────────
+node_modules/
+dist/
+.next/
+out/
+.cache/
+*.tsbuildinfo
+frontend/dist/
+
+# ─── Environment & Secrets ───────────────────────────────────
+# NEVER commit these — they contain passwords and API keys
+.env
+.env.local
+.env.*.local
+.env.production
+
+# ─── Docker ───────────────────────────────────────────────────
+# Don't commit override files with local settings
+docker-compose.override.yml
+
+# ─── Testing ──────────────────────────────────────────────────
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.vitest/
+
+# ─── IDEs ─────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── Logs ─────────────────────────────────────────────────────
+logs/
+*.log

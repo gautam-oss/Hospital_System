@@ -1,0 +1,120 @@
+
+# ─────────────────────────────────────────────────────────────
+# WHAT IS THIS FILE?
+# Docker Compose lets us define ALL our services (Django, Postgres,
+# Redis, Nginx) and start them all with one command: docker-compose up
+# Each "service" becomes its own isolated container.
+# ─────────────────────────────────────────────────────────────
+
+services:
+
+  # ── 1. POSTGRESQL ─────────────────────────────────────────
+  # Our main database. We use a named volume so data persists
+  # even if we stop/restart containers.
+  db:
+    image: postgres:15-alpine          # lightweight postgres image
+    container_name: hospital_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data   # persistent storage
+    ports:
+      - "5432:5432"    # expose so you can connect with pgAdmin locally
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 2. REDIS ──────────────────────────────────────────────
+  # Used for: caching API responses, storing sessions, rate limiting.
+  # Think of it as a super-fast in-memory key-value store.
+  redis:
+    image: redis:7-alpine
+    container_name: hospital_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes   # persist data to disk
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 3. DJANGO BACKEND ─────────────────────────────────────
+  # Our API server. We build from our own Dockerfile.
+  # "depends_on" with condition ensures DB is healthy BEFORE Django starts.
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hospital_backend
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app          # mount source code (hot reload in dev)
+      - media_files:/app/media  # uploaded files (profile pics, etc.)
+    ports:
+      - "8000:8000"    # direct access for debugging (bypasses Nginx)
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── 4. REACT FRONTEND ─────────────────────────────────────
+  # Vite dev server with hot module replacement (HMR).
+  # In production we'll build static files and serve via Nginx.
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hospital_frontend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app          # mount for hot reload
+      - /app/node_modules        # anonymous volume: DON'T overwrite node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost/api
+    depends_on:
+      - backend
+
+  # ── 5. NGINX ──────────────────────────────────────────────
+  # Reverse proxy: routes /api/* → Django, /* → React.
+  # Also handles gzip compression and will do SSL in production.
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: hospital_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"       # HTTP (dev)
+      - "443:443"     # HTTPS (prod)
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
+      - media_files:/app/media:ro
+    depends_on:
+      - backend
+      - frontend
+
+# ─────────────────────────────────────────────────────────────
+# VOLUMES
+# Named volumes are managed by Docker and persist between restarts.
+# Without these, your database would reset every time you stop containers!
+# ─────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+  redis_data:
+  media_files:

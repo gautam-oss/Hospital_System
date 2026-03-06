@@ -1,0 +1,21 @@
+# ── DEV REQUIREMENTS ─────────────────────────────────────────
+# These are ONLY installed in development, not production.
+# Keeps the production image lean and secure.
+
+-r base.txt
+
+# Testing
+pytest==8.2.1
+pytest-django==4.8.0         # Django-aware pytest runner
+pytest-cov==5.0.0            # code coverage reports
+factory-boy==3.3.0           # create fake model instances in tests
+faker==25.2.0                # generate realistic fake data
+
+# Code quality
+black==24.4.2                # auto-formatter (opinionated, no arguments)
+isort==5.13.2                # sorts imports alphabetically
+flake8==7.0.0                # linter — catches syntax errors and style issues
+
+# Dev utilities
+django-extensions==3.2.3     # adds commands like shell_plus, show_urls
+ipython==8.24.0              # nicer interactive shell
